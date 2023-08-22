@@ -44,7 +44,7 @@ jobs:
       - name: Generate Java version file
         run: |
           VERSION=$(grep -o -E "[0-9]+\.[0-9]+\.[0-9]+" src/python/dxpy/toolkit_version.py)
-          echo -e "package com.dnanexus;\nclass DXToolkitVersion {\n    public static final String TOOLKIT_VERSION = \"$VERSION\";\n}" > "$(DNANEXUS_HOME)/src/java/src/main/java/com/dnanexus/DXToolkitVersion.java";
+          echo -e "package com.dnanexus;\nclass DXToolkitVersion {\n    public static final String TOOLKIT_VERSION = \"$VERSION\";\n}" > src/java/src/main/java/com/dnanexus/DXToolkitVersion.java
 
       - name: Build dxjava
         run: mvn compile assembly:single
