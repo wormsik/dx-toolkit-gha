@@ -1,3 +1,5 @@
+name: "Bump dx-toolkit version"
+
 on:
   workflow_dispatch:
     inputs:

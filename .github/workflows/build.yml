@@ -1,3 +1,5 @@
+name: "Build dx-toolkit"
+
 on:
   workflow_dispatch:
     inputs:
@@ -8,7 +10,6 @@ on:
         description: Deploy to PyPi
         type: boolean
         default: false
-
 
 jobs:
   build:
@@ -68,10 +69,7 @@ jobs:
     container:
       image: ubuntu:16.04
     steps:
-      - name: Fail
-        run: exit 1
-
-      - name: Build debian package
+      - name: Build Debian packages
         run: |
           mkdir dist
           apt-get update
@@ -102,7 +100,7 @@ jobs:
     container:
       image: ubuntu:20.04
     steps:
-      - name: Build debian package
+      - name: Build Debian packages
         run: |
           mkdir dist
           apt-get update
