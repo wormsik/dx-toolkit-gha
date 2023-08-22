@@ -5,7 +5,6 @@ on:
 jobs:
   dxpy:
     name: Build dxpy and release it to PyPi
-    needs: prepare
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

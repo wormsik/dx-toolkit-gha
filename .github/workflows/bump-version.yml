@@ -34,6 +34,9 @@ jobs:
         run: |
           grep -F "`echo ${{ github.event.inputs.version }} | cut -d. -f2-`" CHANGELOG.md
 
+      - name: Prepare API wrappers
+        run: make -C ./src api_wrappers
+
       - name: Bump dxpy version
         run: echo "version = '${{ github.event.inputs.version }}'" > src/python/dxpy/toolkit_version.py
 
@@ -42,9 +45,6 @@ jobs:
 
       - name: Prepare debian package changelog
         run: python3 build/convert_changelog.py -v "${{ github.event.inputs.version }}" -a "Kurt Jensen" -e "kjensen@dnanexus.com" CHANGELOG.md
-
-      - name: Prepare API wrappers
-        run: make -C ./src api_wrappers
 
       - name: Ensure all expected files were changed
         run: |
