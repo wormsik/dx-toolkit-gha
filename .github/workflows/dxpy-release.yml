@@ -23,7 +23,7 @@ jobs:
 
       - name: Verify changelogs
         run: |
-          grep -F "`echo ${{ github.event.inputs.version }} | cut -d. -f2-`' CHANGELOG.md
+          grep -F "`echo ${{ github.event.inputs.version }} | cut -d. -f2-`" CHANGELOG.md
           grep -F '${{ github.event.inputs.version }}' debian/changelog
 
       - name: Bump dxpy version
