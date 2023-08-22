@@ -68,9 +68,6 @@ jobs:
     container:
       image: ubuntu:16.04
     steps:
-      - name: final
-        run: exit 1
-
       - name: Build debian package
         run: |
           mkdir dist
@@ -80,6 +77,7 @@ jobs:
           cd dx-toolkit
           git checkout ${{ github.event.inputs.ref }}
           build/build-dx-toolkit-debs.sh
+          ls -l ../
           mv ../*.{changes,deb,dsc,tar.xz} dist/
 
       # - name: Build debian package
