@@ -114,6 +114,8 @@ jobs:
           git checkout ${{ github.event.inputs.ref }}
           build/build-dx-toolkit-debs.sh
           mv ../*.changes ../*.deb ../*.dsc ../*.tar.xz ../dist/
+        env:
+          DEBIAN_FRONTEND: noninteractive
 
       # - name: Build debian package
       #   run: |
