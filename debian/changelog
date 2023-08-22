@@ -1,3 +1,10 @@
+dx-toolkit (0.357.0) trusty; urgency=medium
+
+  * Fixed: dx describe analysis-xxxx --json --verbose
+
+ -- Kurt Jensen <kjensen@dnanexus.com>  Wed, 16 Aug 2023 16:50:06 +0000
+
+
 dx-toolkit (0.356.0) trusty; urgency=medium
 
   * Fixed: dx describe analysis-xxxx --json --verbose

@@ -1,8 +1,54 @@
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version
+      is_beta:
+        description: Is beta release?
+        type: boolean
+        default: false
 
 jobs:
-  dxpy-release:
+  prepare:
+    name: Prepare for build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
+
+      - name: Setup Python
+        uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1
+        with:
+          python-version: '3.10'
+
+      - name: Verify changelogs
+        run: |
+          grep -F "`echo ${{ github.event.inputs.version }} | cut -d. -f2-`' CHANGELOG.md
+          grep -F '${{ github.event.inputs.version }}' debian/changelog
+
+      - name: Bump dxpy version
+        run: echo "version = '${{ github.event.inputs.version }}'" > src/python/dxpy/toolkit_version.py
+
+      - name: Bump dxR version
+        run: sed -i -e 's/[0-9]\+\.[0-9]\+\.[0-9]\+/${{ github.event.inputs.version }}/g' src/R/dxR/DESCRIPTION src/R/dxR/R/dxR-package.R src/R/dxR/man/dxR-package.Rd
+
+      - name: Prepare API wrappers
+        run: make -C ./src api_wrappers
+
+      - name: Ensure all expected files were changed
+        run: |
+          if git diff --exit-code src/python/dxpy/toolkit_version.py src/R/dxR/DESCRIPTION src/R/dxR/R/dxR-package.R src/R/dxR/man/dxR-package.Rd > /dev/null; then
+            exit 1
+          else
+            exit 0
+          fi
+
+      - name: Commit and push changes
+        uses: stefanzweifel/git-auto-commit-action@3ea6ae190baf489ba007f7c92608f33ce20ef04a
+
+  dxpy:
     name: Build dxpy and release it to PyPi
+    needs: prepare
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -18,9 +64,6 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Prepare API wrappers and version file
-        run: make -C ./src api_wrappers toolkit_version
-
       - name: Build dxpy
         run: python3 setup.py sdist
         working-directory: src/python
@@ -30,6 +73,7 @@ jobs:
         with:
           name: dxpy-src
           path: src/python/dist/*.tar.gz
+
 
       # - name: Publish package distributions to PyPI
       #   uses: pypa/gh-action-pypi-publish@b7f401de30cb6434a1e19f805ff006643653240e
