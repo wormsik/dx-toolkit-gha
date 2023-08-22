@@ -1,3 +1,5 @@
+on: workflow_dispatch
+
 jobs:
   dxpy-release:
     name: Build dxpy and release it to PyPi
