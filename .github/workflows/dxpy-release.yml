@@ -1,0 +1,33 @@
+jobs:
+  dxpy-release:
+    name: Build dxpy and release it to PyPi
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/dxpy
+    permissions:
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
+
+      - name: Setup Python
+        uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1
+        with:
+          python-version: '3.10'
+
+      - name: Prepare API wrappers and version file
+        run: make -C ./src api_wrappers toolkit_version
+
+      - name: Build dxpy
+        run: python3 setup.py sdist
+        working-directory: src/python
+
+      - name: Deploy dist package
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
+        with:
+          name: dxpy-src
+          path: src/python/dist/*.tar.gz
+
+      # - name: Publish package distributions to PyPI
+      #   uses: pypa/gh-action-pypi-publish@b7f401de30cb6434a1e19f805ff006643653240e
