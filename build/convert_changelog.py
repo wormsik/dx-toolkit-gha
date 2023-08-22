@@ -34,6 +34,7 @@ if __name__ == "__main__":
                 section = line[4:].strip()
             elif line.startswith('* ') and in_version:
                 if section is None:
+                    print('Section is not recognized. Seems like a wrong file structure.', file=sys.stderr)
                     sys.exit(1)
                 changelog.append(f'{section}: {line[2:].strip()}')
 
@@ -42,6 +43,7 @@ if __name__ == "__main__":
     changelog = list(changelog)
 
     if len(changelog) == 0:
+        print('Changelog seems to be empty! Please confirm manually and re-run this script', file=sys.stderr)
         sys.exit(1)
 
     if args.dry_run:

@@ -8,6 +8,15 @@ Categories for each release: Added, Changed, Deprecated, Removed, Fixed, Securit
 
 ## [357.0] - beta
 
+### Added
+
+* asdkljaslkdj
+
+### Fixed
+
+* asdasd
+* oieuroiyo
+
 ## [356.0] - beta
 
 ### Fixed
