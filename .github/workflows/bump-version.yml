@@ -3,8 +3,8 @@ on:
     inputs:
       version:
         description: Version
-      is_beta:
-        description: Is beta release?
+      dry_run:
+        description: Perform dry run (just print file diffs and don't commit)
         type: boolean
         default: false
 
@@ -12,6 +12,10 @@ jobs:
   prepare:
     name: Prepare for build
     runs-on: ubuntu-latest
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
@@ -21,16 +25,18 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Verify changelogs
+      - name: Verify changelog
         run: |
           grep -F "`echo ${{ github.event.inputs.version }} | cut -d. -f2-`" CHANGELOG.md
-          grep -F '${{ github.event.inputs.version }}' debian/changelog
 
       - name: Bump dxpy version
         run: echo "version = '${{ github.event.inputs.version }}'" > src/python/dxpy/toolkit_version.py
 
       - name: Bump dxR version
         run: sed -i -e 's/[0-9]\+\.[0-9]\+\.[0-9]\+/${{ github.event.inputs.version }}/g' src/R/dxR/DESCRIPTION src/R/dxR/R/dxR-package.R src/R/dxR/man/dxR-package.Rd
+
+      - name: Prepare debian package changelog
+        run: python3 build/convert_changelog.py -v "${{ github.event.inputs.version }}" -a "Kurt Jensen" -e "kjensen@dnanexus.com" CHANGELOG.md
 
       - name: Prepare API wrappers
         run: make -C ./src api_wrappers
@@ -43,37 +49,10 @@ jobs:
             exit 0
           fi
 
+      - name: Print diff
+        if: ${{ github.event.inputs.dry_run == 'true' }}
+        run: git diff
+
       - name: Commit and push changes
+        if: ${{ github.event.inputs.dry_run == 'false' }}
         uses: stefanzweifel/git-auto-commit-action@3ea6ae190baf489ba007f7c92608f33ce20ef04a
-
-  dxpy:
-    name: Build dxpy and release it to PyPi
-    needs: prepare
-    runs-on: ubuntu-latest
-    environment:
-      name: pypi
-      url: https://pypi.org/p/dxpy
-    permissions:
-      id-token: write
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
-
-      - name: Setup Python
-        uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1
-        with:
-          python-version: '3.10'
-
-      - name: Build dxpy
-        run: python3 setup.py sdist
-        working-directory: src/python
-
-      - name: Deploy dist package
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
-        with:
-          name: dxpy-src
-          path: src/python/dist/*.tar.gz
-
-
-      # - name: Publish package distributions to PyPI
-      #   uses: pypa/gh-action-pypi-publish@b7f401de30cb6434a1e19f805ff006643653240e
