@@ -4,8 +4,8 @@ on:
       ref:
         description: Reference (commit, branch, tag, ...)
         default: stable
-      dry_run:
-        description: Perform dry run (just print file diffs and don't commit)
+      deploy_to_pypi:
+        description: Deploy to PyPi
         type: boolean
         default: false
 
@@ -35,6 +35,11 @@ jobs:
           name: dxpy-src
           path: src/python/dist/*.tar.gz
 
+      - name: Publish package distributions to PyPI
+        if: ${{ github.event.inputs.dry_run == 'true' }}
+        uses: pypa/gh-action-pypi-publish@b7f401de30cb6434a1e19f805ff006643653240e
+        working-directory: src/python
+
   dxpy-deb-xenial:
     name: Build dxpy Debian package for Ubuntu 16.04
     runs-on: ubuntu-latest
@@ -42,10 +47,20 @@ jobs:
       - name: Build debian package
         run: |
           mkdir dist
-          docker run -v ./dist:/out --rm dnanexus/dx-toolkit:16.04 \\
-            /bin/bash -xc \"git clone https://github.com/dnanexus/dx-toolkit.git; \\
+          docker run -v ./dist:/out --rm ubuntu:16.04 \\
+            /bin/bash -xc \"apt-get update && apt-get install -y make python-setuptools python-pip python-virtualenv python-dev g++ cmake libboost1.58-all-dev libcurl4-openssl-dev zlib1g-dev libbz2-dev flex bison autoconf doxygen git curl software-properties-common debhelper devscripts r-base-core libdist-zilla-perl openjdk-8-jdk maven libssl-dev && \\
+            git clone https://github.com/dnanexus/dx-toolkit.git; \\
             cd dx-toolkit; git checkout ${{ github.event.inputs.ref }}; build/build-dx-toolkit-debs.sh; \\
             mv /*.{changes,deb,dsc,tar.xz} /out/\"
+
+      # - name: Build debian package
+      #   run: |
+      #     mkdir dist
+      #     docker run -v ./dist:/out --rm dnanexus/dx-toolkit:16.04 \\
+      #       /bin/bash -xc \"git clone https://github.com/dnanexus/dx-toolkit.git; \\
+      #       cd dx-toolkit; git checkout ${{ github.event.inputs.ref }}; build/build-dx-toolkit-debs.sh; \\
+      #       mv /*.{changes,deb,dsc,tar.xz} /out/\"
+
       - name: Deploy dist package
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
         with:
