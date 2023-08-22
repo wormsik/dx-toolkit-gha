@@ -1,3 +1,11 @@
+dx-toolkit (357.0) trusty; urgency=medium
+
+  * Added: asdkljaslkdj
+  * Fixed: asdasd
+  * Fixed: oieuroiyo
+
+ -- Kurt Jensen <kjensen@dnanexus.com>  Tue, 22 Aug 2023 16:26:08 +0000
+
 dx-toolkit (0.357.0) trusty; urgency=medium
 
   * Fixed: dx describe analysis-xxxx --json --verbose
