@@ -40,15 +40,15 @@ jobs:
           name: dxpy
           path: src/python/dist/*.tar.gz
 
-      - name: Build dxjava
-        run: mvn compile assembly:single
-        working-directory: src/java
-
       # FIXME: Move somewhere else - probably bump-version.yml?
       - name: Generate Java version file
         run: |
           VERSION=$(grep -o -E "[0-9]+\.[0-9]+\.[0-9]+" src/python/dxpy/toolkit_version.py)
           echo -e "package com.dnanexus;\nclass DXToolkitVersion {\n    public static final String TOOLKIT_VERSION = \"$VERSION\";\n}" > "$(DNANEXUS_HOME)/src/java/src/main/java/com/dnanexus/DXToolkitVersion.java";
+
+      - name: Build dxjava
+        run: mvn compile assembly:single
+        working-directory: src/java
 
       - name: Upload dxjava artifacts
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
